@@ -6,7 +6,7 @@
 
 #define PRINT_ERR printf("n/a")
 
-int alloc_matrix(int **matrix, int n);
+int **alloc_matrix(int n);
 void free_matrix(int **matrix, int n);
 int read_matrix(int **matrix, int n);
 void print_matrix(int **matrix, int n);
@@ -17,14 +17,18 @@ int main() {
   int **a = NULL, **b = NULL, **result = NULL;
   if (scanf("%d", &n) != 1 || n <= 0) {
     PRINT_ERR;
-  } else if (alloc_matrix(a, n) == ERR || alloc_matrix(b, n) == ERR ||
-             alloc_matrix(result, n) == ERR) {
-    PRINT_ERR;
-  } else if (read_matrix(a, n) == ERR || read_matrix(b, n) == ERR) {
-    PRINT_ERR;
   } else {
-    mul_matrixes(a, b, result, n);
-    print_matrix(result, n);
+    a = alloc_matrix(n);
+    b = alloc_matrix(n);
+    result = alloc_matrix(n);
+    if (!a || !b || !result) {
+      PRINT_ERR;
+    } else if (read_matrix(a, n) == ERR || read_matrix(b, n) == ERR) {
+      PRINT_ERR;
+    } else {
+      mul_matrixes(a, b, result, n);
+      print_matrix(result, n);
+    }
   }
   free_matrix(a, n);
   free_matrix(b, n);
@@ -33,20 +37,24 @@ int main() {
   return 0;
 }
 
-int alloc_matrix(int **matrix, int n) {
+int **alloc_matrix(int n) {
   int check = ERR_NO;
-  matrix = calloc(sizeof(int *), n);
-  if (!matrix) {
+  int **result = malloc(n * sizeof(int *));
+  if (!result) {
     check = ERR;
   }
   for (int i = 0; i < n && check != ERR; ++i) {
-    matrix[i] = calloc(sizeof(int), n);
-    if (!matrix[i]) {
+    result[i] = malloc(n * sizeof(int));
+    if (!result[i]) {
       check = ERR;
     }
   }
+  if (check == ERR) {
+    free(result);
+    result = NULL;
+  }
 
-  return check;
+  return result;
 }
 
 void free_matrix(int **matrix, int n) {
